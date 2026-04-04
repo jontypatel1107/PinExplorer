@@ -339,10 +339,369 @@ h1,h2,h3,h4,.num{font-family:'Clash Display',sans-serif;}
 @keyframes bounce{0%,80%,100%{transform:scale(.6);opacity:.4}40%{transform:scale(1);opacity:1}}
 
 /* ── light theme ── */
-.light{
-  --bg:#f4f4fb;--s1:#ffffff;--s2:#f0f0fa;--s3:#e4e4f4;
-  --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.13);
-  --text:#1a1a2e;--muted:#8888aa;--muted2:#555577;
+body.light{
+  --bg:#f0f0f8;--s1:#ffffff;--s2:#f4f4fc;--s3:#e8e8f4;
+  --border:rgba(0,0,0,0.07);--border2:rgba(0,0,0,0.12);
+  --text:#1a1a2e;--muted:#7a7a9a;--muted2:#4a4a6a;
+  --a1:#6c5ce7;--a2:#e84393;--a3:#00b894;--a4:#fdcb6e;
+}
+body.light .sidebar{
+  background:var(--s1);
+  border-right:1px solid var(--border);
+  box-shadow:2px 0 20px rgba(0,0,0,0.04);
+}
+body.light .logo{
+  background:linear-gradient(135deg,#1a1a2e 30%,var(--a1));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+body.light .logo span{
+  -webkit-text-fill-color:var(--muted);
+}
+body.light .nav-item{
+  color:var(--muted2);
+}
+body.light .nav-item:hover{
+  background:var(--s2);
+}
+body.light .nav-item.active{
+  background:rgba(108,92,231,.1);
+  color:var(--a1);
+  border:1px solid rgba(108,92,231,.2);
+}
+body.light .theme-toggle{
+  background:var(--s2);
+  border:1px solid var(--border);
+}
+body.light .search-bar{
+  background:var(--s1);
+  border:1px solid var(--border);
+  box-shadow:0 2px 12px rgba(0,0,0,0.04);
+}
+body.light .card{
+  background:var(--s1);
+  border:1px solid var(--border);
+  box-shadow:0 2px 16px rgba(0,0,0,0.04);
+}
+body.light .stat-card{
+  background:var(--s1);
+  border:1px solid var(--border);
+  box-shadow:0 2px 16px rgba(0,0,0,0.04);
+}
+body.light .chart-card{
+  background:var(--s1);
+  border:1px solid var(--border);
+  box-shadow:0 2px 16px rgba(0,0,0,0.04);
+}
+body.light .result-card{
+  background:var(--s1);
+  border:1px solid var(--border);
+  box-shadow:0 4px 24px rgba(0,0,0,0.06);
+}
+body.light .result-hero{
+  background:linear-gradient(135deg,rgba(108,92,231,.08),rgba(232,67,147,.05));
+  border-bottom:1px solid var(--border);
+}
+body.light .info-item{
+  background:var(--s2);
+  border:1px solid var(--border);
+}
+body.light .office-tag{
+  background:rgba(108,92,231,.06);
+  border:1px solid rgba(108,92,231,.15);
+  color:#5b4cdb;
+}
+body.light .office-tag.sub{
+  background:rgba(253,203,110,.1);
+  border-color:rgba(253,203,110,.25);
+  color:#d4a017;
+}
+body.light .nearby-card{
+  background:var(--s1);
+  border:1px solid var(--border);
+  box-shadow:0 2px 8px rgba(0,0,0,0.04);
+}
+body.light .nearby-card:hover{
+  border-color:var(--a1);
+  box-shadow:0 4px 16px rgba(108,92,231,.12);
+}
+body.light .state-card{
+  background:var(--s1);
+  border:1px solid var(--border);
+  box-shadow:0 2px 8px rgba(0,0,0,0.04);
+}
+body.light .state-card:hover{
+  border-color:var(--a1);
+  background:var(--s2);
+  box-shadow:0 4px 16px rgba(108,92,231,.1);
+}
+body.light .district-card{
+  background:var(--s1);
+  border:1px solid var(--border);
+  box-shadow:0 2px 8px rgba(0,0,0,0.04);
+}
+body.light .district-hdr:hover{
+  background:var(--s2);
+}
+body.light .city-pill{
+  background:var(--s2);
+  border:1px solid var(--border);
+}
+body.light .bulk-row{
+  background:var(--s1);
+  border:1px solid var(--border);
+  box-shadow:0 1px 6px rgba(0,0,0,0.04);
+}
+body.light .bulk-not-found{
+  background:rgba(232,67,147,.06);
+  border:1px solid rgba(232,67,147,.15);
+  color:#d63384;
+}
+body.light .autocomplete-list{
+  background:var(--s1);
+  border:1px solid var(--border2);
+  box-shadow:0 8px 24px rgba(0,0,0,0.08);
+}
+body.light .ac-item:hover{
+  background:var(--s2);
+}
+body.light .history-tag{
+  background:var(--s2);
+  border:1px solid var(--border);
+}
+body.light .history-tag:hover{
+  border-color:var(--a1);
+  color:var(--a1);
+}
+body.light .compare-item{
+  background:var(--s2);
+  border:1px solid var(--border);
+}
+body.light .compare-item.match{
+  border-color:rgba(0,184,148,.3);
+  background:rgba(0,184,148,.04);
+}
+body.light .compare-item.diff{
+  border-color:rgba(232,67,147,.3);
+  background:rgba(232,67,147,.04);
+}
+body.light .error-bar{
+  background:rgba(232,67,147,.06);
+  border:1px solid rgba(232,67,147,.15);
+  color:#d63384;
+}
+body.light .tag{
+  background:var(--s2);
+  border:1px solid var(--border);
+  color:var(--muted2);
+}
+body.light .btn-sm{
+  background:var(--s2);
+  border:1px solid var(--border2);
+  color:var(--muted2);
+}
+body.light .btn-sm:hover{
+  background:var(--s3);
+  color:var(--text);
+}
+body.light .map-wrap{
+  background:var(--s2);
+  border:1px solid var(--border);
+}
+body.light .states-input{
+  background:var(--s2);
+  border:1px solid var(--border);
+}
+body.light .states-input:focus{
+  border-color:var(--a1);
+}
+body.light .bulk-input{
+  background:var(--s2);
+  border:1px solid var(--border);
+}
+body.light .bulk-input:focus{
+  border-color:var(--a1);
+}
+body.light .search-btn{
+  background:var(--a1);
+}
+body.light .search-btn:hover{
+  filter:brightness(1.08);
+}
+body.light .back-btn{
+  background:var(--s1);
+  border:1px solid var(--border);
+  color:var(--muted2);
+}
+body.light .back-btn:hover{
+  color:var(--text);
+  border-color:var(--border2);
+}
+body.light .share-toast{
+  background:var(--a3);
+  color:#fff;
+  box-shadow:0 4px 20px rgba(0,184,148,.3);
+}
+body.light .recharts-tooltip-wrapper .recharts-default-tooltip{
+  background:var(--s1)!important;
+  border:1px solid var(--border2)!important;
+  box-shadow:0 4px 16px rgba(0,0,0,0.08)!important;
+  color:var(--text)!important;
+}
+body.light .recharts-tooltip-wrapper .recharts-default-tooltip .recharts-tooltip-label{
+  color:var(--text)!important;
+}
+body.light .recharts-tooltip-wrapper .recharts-default-tooltip .recharts-tooltip-item{
+  color:var(--text)!important;
+}
+body.light .recharts-default-tooltip .recharts-tooltip-item-name{
+  color:var(--text)!important;
+}
+body.light .recharts-default-tooltip .recharts-tooltip-item-value{
+  color:var(--text)!important;
+}
+body.light .recharts-legend-item-text{
+  color:var(--text)!important;
+}
+body.light .recharts-default-legend .recharts-legend-item span{
+  color:var(--text)!important;
+}
+body.light .recharts-surface text{
+  fill:var(--text)!important;
+}
+body.light .recharts-pie-label-text{
+  fill:var(--text)!important;
+  font-weight:600!important;
+}
+body.light .recharts-cartesian-axis-tick-value{
+  fill:var(--muted)!important;
+}
+body.light .recharts-text{
+  fill:var(--muted)!important;
+}
+body.light .vs-badge{
+  background:linear-gradient(135deg,var(--a1),var(--a2));
+}
+body.light .count-badge{
+  background:var(--s2);
+  color:var(--muted);
+}
+body.light .export-row{
+  border-top:1px solid var(--border);
+}
+body.light .divider{
+  background:var(--border);
+}
+body.light .toggle-pill{
+  background:var(--s3);
+  border:1px solid var(--border2);
+}
+body.light .toggle-pill.on{
+  background:var(--a1);
+}
+body.light .toggle-dot{
+  background:#fff;
+}
+body.light .pin-big{
+  background:linear-gradient(135deg,var(--a1),var(--a2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+body.light .badge-green{
+  background:rgba(0,184,148,.08);
+  border:1px solid rgba(0,184,148,.2);
+  color:#00a381;
+}
+body.light .badge-orange{
+  background:rgba(253,203,110,.12);
+  border:1px solid rgba(253,203,110,.25);
+  color:#c49000;
+}
+body.light .loader{
+  color:var(--muted);
+}
+body.light .dot{
+  background:var(--a1);
+}
+body.light .empty{
+  color:var(--muted);
+}
+body.light .empty h3{
+  color:var(--text);
+}
+body.light .section-title{
+  color:var(--muted);
+}
+body.light .page-sub{
+  color:var(--muted);
+}
+body.light .history-label{
+  color:var(--muted);
+}
+body.light .stat-label{
+  color:var(--muted);
+}
+body.light .stat-value{
+  color:var(--text);
+}
+body.light .stat-sub{
+  color:var(--muted);
+}
+body.light .chart-title{
+  color:var(--text);
+}
+body.light .chart-sub{
+  color:var(--muted);
+}
+body.light .info-label{
+  color:var(--muted);
+}
+body.light .info-val{
+  color:var(--text);
+}
+body.light .result-meta span{
+  color:var(--muted);
+}
+body.light .offices-wrap h4{
+  color:var(--muted);
+}
+body.light .nearby-pin{
+  color:var(--a1);
+}
+body.light .nearby-city{
+  color:var(--text);
+}
+body.light .nearby-meta{
+  color:var(--muted);
+}
+body.light .bulk-pin{
+  color:var(--a1);
+}
+body.light .bulk-city{
+  color:var(--text);
+}
+body.light .bulk-state{
+  color:var(--muted);
+}
+body.light .state-name-txt{
+  color:var(--text);
+}
+body.light .state-arrow{
+  color:var(--muted);
+}
+body.light .district-name{
+  color:var(--text);
+}
+body.light .chevron{
+  color:var(--muted);
+}
+body.light .compare-field{
+  color:var(--muted);
+}
+body.light .compare-val{
+  color:var(--text);
+}
+body.light .ac-type{
+  background:var(--s3);
+  color:var(--muted);
 }
 
 /* ── responsive ── */
@@ -1595,10 +1954,15 @@ export default function App() {
     { id: "about", icon: "ℹ️", label: "About" },
   ];
 
+  useEffect(() => {
+    if (light) document.body.classList.add("light");
+    else document.body.classList.remove("light");
+  }, [light]);
+
   return (
     <>
       <style>{CSS}</style>
-      <div className={`app ${light ? "light" : ""}`}>
+      <div className="app">
         <nav className="sidebar">
           <div className="logo">
             PinExplorer
