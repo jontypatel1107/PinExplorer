@@ -9,11 +9,14 @@ A full-stack web application for exploring Indian pincodes, built with **React**
 | Feature | Description |
 |---|---|
 | 📍 Pincode Lookup | Search any 6-digit pincode for city, district, state, offices |
+| 🔍 Explore Pincodes | Browse and filter by state → district → taluk with paginated results |
+| 📊 Dashboard | Overview with stat cards, state-wise bar chart, delivery pie chart |
 | 🔍 City Search | Find pincodes by city, district or post office name |
 | 📋 Bulk Lookup | Look up up to 50 pincodes at once |
 | ⚖️ Compare | Side-by-side pincode comparison with match/mismatch highlight |
 | 🗺️ Browse States | Explore all states → districts → cities |
 | 📊 Analytics | Charts and stats — offices per state, office types, delivery status |
+| ℹ️ About | Feature overview, tech stack, and API endpoint reference |
 | 🔁 Autocomplete | Live suggestions as you type |
 | 📍 Nearby Pincodes | Find pincodes in the same district |
 | ⬇️ CSV Export | Export any result set as a CSV file |
@@ -389,6 +392,236 @@ GET /states/MAHARASHTRA
   ]
 }
 ```
+
+---
+
+### `GET /api/states`
+
+Get a sorted array of all unique state names.
+
+**Example Request**
+
+```
+GET /api/states
+```
+
+**Example Response**
+
+```json
+[
+  "ANDHRA PRADESH",
+  "GUJARAT",
+  "MAHARASHTRA",
+  "TAMIL NADU"
+]
+```
+
+---
+
+### `GET /api/states/:state/districts`
+
+Get all districts for a given state.
+
+**URL Parameters**
+
+| Param | Type | Description |
+|---|---|---|
+| `state` | string | State name (case-insensitive) |
+
+**Example Request**
+
+```
+GET /api/states/GUJARAT/districts
+```
+
+**Example Response**
+
+```json
+[
+  "AHMEDABAD",
+  "SURAT",
+  "VADODARA"
+]
+```
+
+---
+
+### `GET /api/states/:state/districts/:district/taluks`
+
+Get all taluks for a given state and district.
+
+**URL Parameters**
+
+| Param | Type | Description |
+|---|---|---|
+| `state` | string | State name |
+| `district` | string | District name |
+
+**Example Request**
+
+```
+GET /api/states/GUJARAT/districts/AHMEDABAD/taluks
+```
+
+**Example Response**
+
+```json
+[
+  "AHMEDABAD CITY",
+  "DASKROI",
+  "SANAND"
+]
+```
+
+---
+
+### `GET /api/pincodes`
+
+Get filtered and paginated pincode data.
+
+**Query Parameters**
+
+| Param | Type | Required | Description |
+|---|---|---|---|
+| `state` | string | ❌ | Filter by state |
+| `district` | string | ❌ | Filter by district |
+| `taluk` | string | ❌ | Filter by taluk |
+| `page` | number | ❌ | Page number (default: 1) |
+| `limit` | number | ❌ | Results per page (default: 20) |
+
+**Example Request**
+
+```
+GET /api/pincodes?state=GUJARAT&district=AHMEDABAD&taluk=DASKROI&page=1&limit=20
+```
+
+**Example Response**
+
+```json
+{
+  "data": [
+    {
+      "pincode": 382425,
+      "officeName": "Daskroi S.O",
+      "officeType": "Sub Post Office",
+      "deliveryStatus": "Delivery",
+      "taluk": "DASKROI",
+      "district": "AHMEDABAD",
+      "state": "GUJARAT",
+      "division": "Ahmedabad",
+      "region": "Rajkot",
+      "circle": "Gujarat"
+    }
+  ],
+  "total": 120,
+  "page": 1,
+  "limit": 20
+}
+```
+
+---
+
+### `GET /api/pincode/:pincode`
+
+Look up a single pincode by path parameter.
+
+**URL Parameters**
+
+| Param | Type | Description |
+|---|---|---|
+| `pincode` | number | 6-digit Indian pincode |
+
+**Example Request**
+
+```
+GET /api/pincode/400001
+```
+
+**Example Response**
+
+```json
+{
+  "success": true,
+  "cityDetails": {
+    "pincode": 400001,
+    "city": "Mumbai",
+    "district": "Mumbai",
+    "state": "MAHARASHTRA",
+    "region": "Mumbai",
+    "division": "Mumbai City",
+    "circle": "Maharashtra",
+    "totalOffices": 5,
+    "offices": [
+      { "name": "Fort S.O", "type": "Sub Post Office", "deliveryStatus": "Delivery" }
+    ]
+  }
+}
+```
+
+---
+
+### `GET /api/stats/state-distribution`
+
+Get state-wise office count distribution for bar charts.
+
+**Example Request**
+
+```
+GET /api/stats/state-distribution
+```
+
+**Example Response**
+
+```json
+[
+  { "state": "GUJARAT", "count": 12000 },
+  { "state": "MAHARASHTRA", "count": 20000 },
+  { "state": "TAMIL NADU", "count": 15000 }
+]
+```
+
+---
+
+### `GET /api/stats/delivery-distribution`
+
+Get delivery vs non-delivery office counts for pie charts.
+
+**Example Request**
+
+```
+GET /api/stats/delivery-distribution
+```
+
+**Example Response**
+
+```json
+{
+  "delivery": 120000,
+  "nonDelivery": 34000
+}
+```
+
+---
+
+### `GET /api/export`
+
+Export pincode data as a CSV file.
+
+**Query Parameters**
+
+| Param | Type | Required | Description |
+|---|---|---|---|
+| `state` | string | ❌ | Filter by state |
+| `district` | string | ❌ | Filter by district |
+| `taluk` | string | ❌ | Filter by taluk |
+
+**Example Request**
+
+```
+GET /api/export?state=GUJARAT
+```
+
+Returns a CSV file download with columns: Pincode, Office Name, Office Type, Delivery Status, Taluk, District, State, Division, Region, Circle.
 
 ---
 
