@@ -30,9 +30,16 @@ A full-stack web application for exploring Indian pincodes, built with **React**
 
 ```
 pinexplorer/
-├── server.js              # Express backend (Node.js)
-├── src/
-│   └── PincodeApp.jsx     # Full React frontend (single file)
+├── server.js                      # Express entry point
+├── config/
+│   └── db.js                      # MongoDB connection configuration
+├── models/
+│   └── Pincode.js                 # Mongoose schema and model
+├── controllers/
+│   └── pincodeController.js       # All route handler logic
+├── routes/
+│   └── pincodeRoutes.js           # API route definitions
+├── frontend/                      # React + Vite frontend
 ├── package.json
 └── README.md
 ```
@@ -79,55 +86,52 @@ git clone https://github.com/yourusername/pinexplorer.git
 cd pinexplorer
 ```
 
-### 2. Install backend dependencies
+### 2. Install dependencies
 
 ```bash
-npm install express mongoose cors
+cd Project
+npm install
 ```
 
-### 3. Start MongoDB
+### 3. Set up environment variables (optional)
 
-Make sure MongoDB is running locally:
+Create a `.env` file in the `Project/` directory:
 
-```bash
-mongod --dbpath /your/db/path
+```env
+PORT=5000
+MONGODB_URI=your_mongodb_connection_string
 ```
 
-Or if you use the MongoDB service:
-
-```bash
-sudo systemctl start mongod   # Linux
-brew services start mongodb-community  # macOS
-```
+> If `MONGODB_URI` is not provided, the app uses the default MongoDB Atlas connection.
 
 ### 4. Start the backend server
 
 ```bash
-node server.js
+npm start
+```
+
+Or for development:
+
+```bash
+npm run dev
 ```
 
 You should see:
 
 ```
 MongoDB Connected
-Server running on http://localhost:5000
+Server running on port 5000
 ```
 
-### 5. Set up the React frontend
+### 5. Start the React frontend
 
 ```bash
-npx create-react-app pinexplorer-ui
-cd pinexplorer-ui
-npm install recharts
+cd frontend
+npm install
+npm run dev
 ```
 
-Replace the contents of `src/App.jsx` with `PincodeApp.jsx`, then start the dev server:
-
-```bash
-npm start
-```
-
-The app will be available at [http://localhost:3000](http://localhost:3000).
+The frontend will be available at [http://localhost:5173](http://localhost:5173).
 
 ---
 
@@ -627,11 +631,23 @@ Returns a CSV file download with columns: Pincode, Office Name, Office Type, Del
 
 ## 🧱 Tech Stack
 
-### Backend
+### Backend (MVC Architecture)
 - **Node.js** — Runtime
 - **Express.js** — Web framework
 - **Mongoose** — MongoDB ODM
 - **CORS** — Cross-origin requests
+
+#### Backend Architecture
+
+The backend follows the **MVC (Model-View-Controller)** pattern:
+
+| Directory | Purpose |
+|---|---|
+| `config/` | Database connection and app configuration |
+| `models/` | Mongoose schemas and models |
+| `controllers/` | Business logic and request handlers |
+| `routes/` | API route definitions mapped to controllers |
+| `server.js` | Express app entry point and middleware setup |
 
 ### Frontend
 - **React** — UI framework
@@ -653,10 +669,11 @@ npm install express mongoose cors
 ### Frontend
 
 ```bash
-npm install recharts
+cd frontend
+npm install
 ```
 
-No other third-party UI libraries are used — the entire UI is hand-crafted with CSS.
+No other third-party UI libraries are used in the frontend — the entire UI is hand-crafted with CSS.
 
 ---
 
@@ -676,25 +693,21 @@ pincodeSchema.index({ officeName: "text", taluk: "text", districtName: "text" })
 
 ## 🔧 Environment & Configuration
 
-By default the app uses these hardcoded values. You can extract them into a `.env` file using `dotenv` if needed:
+The app uses these environment variables. Create a `.env` file in the `Project/` directory:
 
 | Variable | Default | Description |
 |---|---|---|
-| MongoDB URI | `mongodb://localhost:27017/Pincode1` | Local MongoDB connection |
-| Server Port | `5000` | Express server port |
-| React Dev Port | `3000` | Create React App default |
+| `MONGODB_URI` | MongoDB Atlas connection string | Database connection |
+| `PORT` | `5000` | Express server port |
 
-To use environment variables, install dotenv and update `server.js`:
+Example `.env`:
 
-```bash
-npm install dotenv
+```env
+PORT=5000
+MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/Pincode
 ```
 
-```js
-require('dotenv').config();
-mongoose.connect(process.env.MONGO_URI || "mongodb://localhost:27017/Pincode1");
-app.listen(process.env.PORT || 5000);
-```
+The database connection is managed in `config/db.js` and the server listens on the configured port via `server.js`.
 
 ---
 
