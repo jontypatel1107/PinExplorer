@@ -1097,7 +1097,8 @@ function StatsPage() {
                   labelLine={false} fontSize={9}>
                   {stats.officeTypes.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                 </Pie>
-                <Tooltip contentStyle={{ background: "#161628", border: "1px solid rgba(255,255,255,.1)", borderRadius: 10, fontSize: 12 }} />
+                <Tooltip contentStyle={{ background: "#161628", border: "1px solid rgba(255,255,255,.1)", borderRadius: 10, fontSize: 12, color: "#eeeef8" }}
+                  labelStyle={{ color: "#eeeef8" }} itemStyle={{ color: "#eeeef8" }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -1111,7 +1112,8 @@ function StatsPage() {
                   label={({ status, percent }) => `${status?.slice(0, 8)} ${(percent * 100).toFixed(0)}%`} labelLine={false} fontSize={9}>
                   {stats.deliveryStatus.map((_, i) => <Cell key={i} fill={[COLORS[2], COLORS[1]][i % 2]} />)}
                 </Pie>
-                <Tooltip contentStyle={{ background: "#161628", border: "1px solid rgba(255,255,255,.1)", borderRadius: 10, fontSize: 12 }} />
+                <Tooltip contentStyle={{ background: "#161628", border: "1px solid rgba(255,255,255,.1)", borderRadius: 10, fontSize: 12, color: "#eeeef8" }}
+                  labelStyle={{ color: "#eeeef8" }} itemStyle={{ color: "#eeeef8" }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -1138,6 +1140,439 @@ function StatsPage() {
 }
 
 /* ═══════════════════════════════════════════════════════════
+   EXPLORE PAGE
+═══════════════════════════════════════════════════════════ */
+function ExplorePage() {
+  const [states, setStates] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [taluks, setTaluks] = useState([]);
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedDistrict, setSelectedDistrict] = useState("");
+  const [selectedTaluk, setSelectedTaluk] = useState("");
+  const [data, setData] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(20);
+  const [loading, setLoading] = useState(false);
+  const [dropdownLoading, setDropdownLoading] = useState(false);
+
+  useEffect(() => {
+    fetch(`${API}/api/states`).then((r) => r.json()).then((d) => {
+      if (Array.isArray(d)) setStates(d);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!selectedState) {
+      setDistricts([]);
+      setTaluks([]);
+      setSelectedDistrict("");
+      setSelectedTaluk("");
+      return;
+    }
+    setDropdownLoading(true);
+    setSelectedDistrict("");
+    setSelectedTaluk("");
+    setTaluks([]);
+    fetch(`${API}/api/states/${encodeURIComponent(selectedState)}/districts`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (Array.isArray(d)) setDistricts(d);
+      })
+      .finally(() => setDropdownLoading(false));
+  }, [selectedState]);
+
+  useEffect(() => {
+    if (!selectedDistrict) {
+      setTaluks([]);
+      setSelectedTaluk("");
+      return;
+    }
+    setDropdownLoading(true);
+    setSelectedTaluk("");
+    fetch(`${API}/api/states/${encodeURIComponent(selectedState)}/districts/${encodeURIComponent(selectedDistrict)}/taluks`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (Array.isArray(d)) setTaluks(d);
+      })
+      .finally(() => setDropdownLoading(false));
+  }, [selectedDistrict, selectedState]);
+
+  const fetchData = useCallback(() => {
+    setLoading(true);
+    const params = new URLSearchParams();
+    if (selectedState) params.set("state", selectedState);
+    if (selectedDistrict) params.set("district", selectedDistrict);
+    if (selectedTaluk) params.set("taluk", selectedTaluk);
+    params.set("page", page);
+    params.set("limit", limit);
+
+    fetch(`${API}/api/pincodes?${params.toString()}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.data) {
+          setData(d.data);
+          setTotal(d.total);
+        }
+      })
+      .finally(() => setLoading(false));
+  }, [selectedState, selectedDistrict, selectedTaluk, page, limit]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const handleExport = () => {
+    const params = new URLSearchParams();
+    if (selectedState) params.set("state", selectedState);
+    if (selectedDistrict) params.set("district", selectedDistrict);
+    if (selectedTaluk) params.set("taluk", selectedTaluk);
+    window.open(`${API}/api/export?${params.toString()}`, "_blank");
+  };
+
+  const totalPages = Math.ceil(total / limit);
+
+  return (
+    <div>
+      <div className="page-header">
+        <div className="page-title">Explore Pincodes</div>
+        <div className="page-sub">Browse and filter pincodes by state, district, and taluk</div>
+      </div>
+
+      <div className="card" style={{ marginBottom: 20 }}>
+        <div className="section-title">Filters</div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12 }}>
+          <div>
+            <label style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--muted)", marginBottom: 6, display: "block" }}>State</label>
+            <select
+              value={selectedState}
+              onChange={(e) => setSelectedState(e.target.value)}
+              style={{
+                width: "100%", padding: "10px 14px", borderRadius: 10, border: "1px solid var(--border)",
+                background: "var(--s2)", color: "var(--text)", fontSize: 14, fontFamily: "'Cabinet Grotesk',sans-serif",
+                outline: "none", cursor: "pointer",
+              }}
+            >
+              <option value="">All States</option>
+              {states.map((s) => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
+
+          <div>
+            <label style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--muted)", marginBottom: 6, display: "block" }}>District</label>
+            <select
+              value={selectedDistrict}
+              onChange={(e) => setSelectedDistrict(e.target.value)}
+              disabled={!selectedState || dropdownLoading}
+              style={{
+                width: "100%", padding: "10px 14px", borderRadius: 10, border: "1px solid var(--border)",
+                background: "var(--s2)", color: "var(--text)", fontSize: 14, fontFamily: "'Cabinet Grotesk',sans-serif",
+                outline: "none", cursor: "pointer", opacity: !selectedState ? 0.5 : 1,
+              }}
+            >
+              <option value="">All Districts</option>
+              {districts.map((d) => <option key={d} value={d}>{d}</option>)}
+            </select>
+          </div>
+
+          <div>
+            <label style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--muted)", marginBottom: 6, display: "block" }}>Taluk</label>
+            <select
+              value={selectedTaluk}
+              onChange={(e) => setSelectedTaluk(e.target.value)}
+              disabled={!selectedDistrict || dropdownLoading}
+              style={{
+                width: "100%", padding: "10px 14px", borderRadius: 10, border: "1px solid var(--border)",
+                background: "var(--s2)", color: "var(--text)", fontSize: 14, fontFamily: "'Cabinet Grotesk',sans-serif",
+                outline: "none", cursor: "pointer", opacity: !selectedDistrict ? 0.5 : 1,
+              }}
+            >
+              <option value="">All Taluks</option>
+              {taluks.map((t) => <option key={t} value={t}>{t}</option>)}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {loading && <Loader label="Loading pincodes…" />}
+
+      {!loading && data.length > 0 && (
+        <>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+            <div style={{ fontSize: 13, color: "var(--muted)" }}>
+              Showing <strong style={{ color: "var(--text)" }}>{data.length}</strong> of <strong style={{ color: "var(--text)" }}>{total.toLocaleString()}</strong> results
+            </div>
+            <button className="btn-sm" onClick={handleExport}>⬇️ Download CSV</button>
+          </div>
+
+          <div style={{ overflowX: "auto", borderRadius: 14, border: "1px solid var(--border)" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, fontFamily: "'Cabinet Grotesk',sans-serif" }}>
+              <thead>
+                <tr style={{ background: "var(--s2)" }}>
+                  {["Pincode", "Office Name", "Type", "Delivery", "Taluk", "District", "State"].map((h) => (
+                    <th key={h} style={{ padding: "12px 16px", textAlign: "left", fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: ".05em", fontSize: 11, borderBottom: "1px solid var(--border)" }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {data.map((row, i) => (
+                  <tr key={i} style={{ borderBottom: "1px solid var(--border)", transition: "background .15s" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = "var(--s2)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
+                    <td style={{ padding: "10px 16px", fontWeight: 700, color: "var(--a1)" }}>{row.pincode}</td>
+                    <td style={{ padding: "10px 16px", fontWeight: 500 }}>{row.officeName}</td>
+                    <td style={{ padding: "10px 16px" }}>{row.officeType}</td>
+                    <td style={{ padding: "10px 16px" }}>
+                      <span className={`badge ${row.deliveryStatus === "Delivery" ? "badge-green" : "badge-orange"}`}>
+                        {row.deliveryStatus}
+                      </span>
+                    </td>
+                    <td style={{ padding: "10px 16px" }}>{row.taluk}</td>
+                    <td style={{ padding: "10px 16px" }}>{row.district}</td>
+                    <td style={{ padding: "10px 16px" }}>{row.state}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {totalPages > 1 && (
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 8, marginTop: 20 }}>
+              <button className="btn-sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>← Prev</button>
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pg;
+                if (totalPages <= 5) pg = i + 1;
+                else if (page <= 3) pg = i + 1;
+                else if (page >= totalPages - 2) pg = totalPages - 4 + i;
+                else pg = page - 2 + i;
+                return (
+                  <button key={pg} onClick={() => setPage(pg)}
+                    style={{
+                      width: 36, height: 36, borderRadius: 8, border: "1px solid var(--border)",
+                      background: page === pg ? "var(--a1)" : "var(--s2)", color: page === pg ? "#fff" : "var(--muted2)",
+                      fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "'Cabinet Grotesk',sans-serif",
+                    }}>
+                    {pg}
+                  </button>
+                );
+              })}
+              <button className="btn-sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}>Next →</button>
+            </div>
+          )}
+        </>
+      )}
+
+      {!loading && data.length === 0 && (
+        <Empty icon="🔍" title="No pincodes found" sub="Try adjusting your filters to see results" />
+      )}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DASHBOARD PAGE
+═══════════════════════════════════════════════════════════ */
+function DashboardPage() {
+  const [stats, setStats] = useState(null);
+  const [stateDist, setStateDist] = useState([]);
+  const [deliveryDist, setDeliveryDist] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([
+      fetch(`${API}/api/stats`).then((r) => r.json()),
+      fetch(`${API}/api/stats/state-distribution`).then((r) => r.json()),
+      fetch(`${API}/api/stats/delivery-distribution`).then((r) => r.json()),
+    ]).then(([s, sd, dd]) => {
+      if (s.success) setStats(s);
+      if (Array.isArray(sd)) setStateDist(sd);
+      if (dd && typeof dd === "object") setDeliveryDist(dd);
+    }).finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <Loader label="Loading dashboard…" />;
+  if (!stats) return <Empty icon="📊" title="Dashboard unavailable" sub="Could not load dashboard data" />;
+
+  const topStates = stateDist.slice(0, 15);
+  const deliveryData = Object.entries(deliveryDist).map(([key, value]) => ({ name: key, value }));
+  const deliveryColors = ["#00e5b0", "#ff6b9d", "#ffc043", "#7c6fff"];
+
+  return (
+    <div>
+      <div className="page-header">
+        <div className="page-title">Dashboard</div>
+        <div className="page-sub">Overview of Indian postal data and statistics</div>
+      </div>
+
+      <div className="card-grid card-grid-4" style={{ marginBottom: 20 }}>
+        {[
+          { label: "Total Pincodes", value: stats.summary.totalPincodes?.toLocaleString(), sub: "Unique codes", color: "rgba(124,111,255,.15)" },
+          { label: "Total States", value: stats.summary.totalStates, sub: "Covered", color: "rgba(0,229,176,.12)" },
+          { label: "Delivery Offices", value: stats.deliveryStatus?.find((d) => d.status === "Delivery")?.count?.toLocaleString() ?? "—", sub: "Active delivery", color: "rgba(0,229,176,.12)" },
+          { label: "Non-Delivery Offices", value: stats.deliveryStatus?.find((d) => d.status === "Non-Delivery")?.count?.toLocaleString() ?? "—", sub: "Non-delivery", color: "rgba(255,107,157,.12)" },
+        ].map((s) => (
+          <div className="stat-card" key={s.label} style={{ "--glow-color": s.color }}>
+            <div className="stat-label">{s.label}</div>
+            <div className="stat-value">{s.value}</div>
+            <div className="stat-sub">{s.sub}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="card-grid card-grid-2">
+        <div className="chart-card">
+          <div className="chart-title">State-wise Distribution</div>
+          <div className="chart-sub">Top 15 states by office count</div>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={topStates} layout="vertical" margin={{ left: 10, right: 20 }}>
+              <XAxis type="number" tick={{ fill: "#6b6b90", fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis type="category" dataKey="state" tick={{ fill: "#9999bb", fontSize: 10 }} width={90} axisLine={false} tickLine={false}
+                tickFormatter={(v) => v?.length > 10 ? v.slice(0, 10) + "…" : v} />
+              <Tooltip
+                contentStyle={{ background: "#161628", border: "1px solid rgba(255,255,255,.1)", borderRadius: 10, fontSize: 12 }}
+                labelStyle={{ color: "#eeeef8" }} itemStyle={{ color: "#a89fff" }}
+              />
+              <Bar dataKey="count" fill="#7c6fff" radius={[0, 6, 6, 0]} name="Offices" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="chart-card">
+          <div className="chart-title">Delivery Status</div>
+          <div className="chart-sub">Delivery vs Non-Delivery offices</div>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={deliveryData}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={100}
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                labelLine={false}
+                fontSize={12}
+              >
+                {deliveryData.map((_, i) => <Cell key={i} fill={deliveryColors[i % deliveryColors.length]} />)}
+              </Pie>
+              <Tooltip
+                contentStyle={{ background: "#161628", border: "1px solid rgba(255,255,255,.1)", borderRadius: 10, fontSize: 12, color: "#eeeef8" }}
+                labelStyle={{ color: "#eeeef8" }}
+                itemStyle={{ color: "#eeeef8" }}
+              />
+              <Legend wrapperStyle={{ color: "#eeeef8", fontSize: 12 }} />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ABOUT PAGE
+═══════════════════════════════════════════════════════════ */
+function AboutPage() {
+  return (
+    <div>
+      <div className="page-header">
+        <div className="page-title">About PinExplorer</div>
+        <div className="page-sub">India's comprehensive pincode intelligence platform</div>
+      </div>
+
+      <div className="card" style={{ marginBottom: 20 }}>
+        <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>What is PinExplorer?</h3>
+        <p style={{ fontSize: 14, color: "var(--muted2)", lineHeight: 1.7, marginBottom: 16 }}>
+          PinExplorer is a full-stack web application that provides detailed information about Indian postal codes (PIN codes).
+          It allows users to look up pincodes, search by city or district, explore postal data by state, and visualize statistics
+          through interactive charts and dashboards.
+        </p>
+        <p style={{ fontSize: 14, color: "var(--muted2)", lineHeight: 1.7 }}>
+          Built with React, Node.js, Express, and MongoDB Atlas, PinExplorer offers a modern and responsive interface
+          for exploring India's vast postal network of over 150,000 post offices across 28 states and union territories.
+        </p>
+      </div>
+
+      <div className="card-grid card-grid-2" style={{ marginBottom: 20 }}>
+        <div className="card">
+          <h4 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12 }}>Features</h4>
+          <ul style={{ listStyle: "none", padding: 0 }}>
+            {[
+              "Pincode lookup with full details",
+              "Search by city, district, or office name",
+              "Bulk lookup of up to 50 pincodes",
+              "Side-by-side pincode comparison",
+              "Explore by state, district, and taluk",
+              "Interactive dashboard with charts",
+              "CSV export functionality",
+              "Nearby pincodes discovery",
+            ].map((f, i) => (
+              <li key={i} style={{ padding: "8px 0", fontSize: 13, color: "var(--muted2)", borderBottom: i < 7 ? "1px solid var(--border)" : "none" }}>
+                ✓ {f}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="card">
+          <h4 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12 }}>Tech Stack</h4>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {[
+              ["Frontend", "React 19, Vite, Recharts"],
+              ["Backend", "Node.js, Express"],
+              ["Database", "MongoDB Atlas"],
+              ["Styling", "Custom CSS with CSS Variables"],
+            ].map(([label, value]) => (
+              <div key={label} style={{ display: "flex", justifyContent: "space-between", padding: "10px 14px", background: "var(--s2)", borderRadius: 10, border: "1px solid var(--border)" }}>
+                <span style={{ fontSize: 12, color: "var(--muted)", textTransform: "uppercase", letterSpacing: ".05em" }}>{label}</span>
+                <span style={{ fontSize: 13, fontWeight: 600 }}>{value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="card">
+        <h4 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12 }}>API Endpoints</h4>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, fontFamily: "'Cabinet Grotesk',sans-serif" }}>
+            <thead>
+              <tr style={{ borderBottom: "1px solid var(--border)" }}>
+                <th style={{ padding: "10px 12px", textAlign: "left", color: "var(--muted)", fontSize: 11, textTransform: "uppercase", letterSpacing: ".05em" }}>Method</th>
+                <th style={{ padding: "10px 12px", textAlign: "left", color: "var(--muted)", fontSize: 11, textTransform: "uppercase", letterSpacing: ".05em" }}>Endpoint</th>
+                <th style={{ padding: "10px 12px", textAlign: "left", color: "var(--muted)", fontSize: 11, textTransform: "uppercase", letterSpacing: ".05em" }}>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                ["GET", "/api/states", "Get all states"],
+                ["GET", "/api/states/:state/districts", "Get districts by state"],
+                ["GET", "/api/states/:state/districts/:district/taluks", "Get taluks by district"],
+                ["GET", "/api/pincodes", "Get filtered pincode data"],
+                ["GET", "/api/search?q=", "Search pincodes"],
+                ["GET", "/api/pincode/:pincode", "Get pincode details"],
+                ["GET", "/api/stats", "Get dashboard statistics"],
+                ["GET", "/api/stats/state-distribution", "State-wise distribution"],
+                ["GET", "/api/stats/delivery-distribution", "Delivery status distribution"],
+                ["GET", "/api/export", "Export data as CSV"],
+              ].map(([method, endpoint, desc]) => (
+                <tr key={endpoint} style={{ borderBottom: "1px solid var(--border)" }}>
+                  <td style={{ padding: "8px 12px" }}>
+                    <span className="badge badge-green" style={{ fontSize: 10 }}>{method}</span>
+                  </td>
+                  <td style={{ padding: "8px 12px", fontFamily: "monospace", fontSize: 12, color: "var(--a1)" }}>{endpoint}</td>
+                  <td style={{ padding: "8px 12px", color: "var(--muted2)" }}>{desc}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
    APP ROOT
 ═══════════════════════════════════════════════════════════ */
 export default function App() {
@@ -1151,11 +1586,13 @@ export default function App() {
 
   const nav = [
     { id: "pincode", icon: "📍", label: "Pincode Lookup" },
-    { id: "search", icon: "🔍", label: "Search by City" },
+    { id: "explore", icon: "🔍", label: "Explore" },
+    { id: "dashboard", icon: "📊", label: "Dashboard" },
+    { id: "search", icon: "🏙", label: "Search by City" },
     { id: "bulk", icon: "📋", label: "Bulk Lookup" },
     { id: "compare", icon: "⚖️", label: "Compare" },
     { id: "states", icon: "🗺️", label: "Browse States" },
-    { id: "stats", icon: "📊", label: "Analytics" },
+    { id: "about", icon: "ℹ️", label: "About" },
   ];
 
   return (
@@ -1183,11 +1620,13 @@ export default function App() {
 
         <main className="main">
           {page === "pincode" && <PincodePage history={history} addHistory={addHistory} />}
+          {page === "explore" && <ExplorePage />}
+          {page === "dashboard" && <DashboardPage />}
           {page === "search" && <SearchPage />}
           {page === "bulk" && <BulkPage />}
           {page === "compare" && <ComparePage />}
           {page === "states" && <StatesPage />}
-          {page === "stats" && <StatsPage />}
+          {page === "about" && <AboutPage />}
         </main>
       </div>
     </>

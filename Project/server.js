@@ -69,6 +69,38 @@ app.get("/api/pincode", async (req, res) => {
   }
 });
 
+// ── GET /api/pincode/:pincode ─────────────────────────────
+app.get("/api/pincode/:pincode", async (req, res) => {
+  try {
+    const pin = Number(req.params.pincode);
+    if (!pin) return res.status(400).json({ success: false, message: "Please provide a valid pincode" });
+
+    const data = await Pincode.find({ pincode: pin });
+    if (data.length === 0) return res.status(404).json({ success: false, message: "No data found for this pincode" });
+
+    res.json({
+      success: true,
+      cityDetails: {
+        pincode: pin,
+        city: data[0].taluk,
+        district: data[0].districtName,
+        state: data[0].stateName?.trim(),
+        region: data[0].regionName,
+        division: data[0].divisionName,
+        circle: data[0].circleName,
+        totalOffices: data.length,
+        offices: data.map((item) => ({
+          name: item.officeName,
+          type: item.officeType,
+          deliveryStatus: item.deliveryStatus,
+        })),
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // ── GET /api/search?q=Mumbai&type=city|district|office ────
 app.get("/api/search", async (req, res) => {
   try {
@@ -292,7 +324,210 @@ app.get("/api/stats", async (req, res) => {
   }
 });
 
-// ── GET /states ───────────────────────────────────────────
+// ── GET /api/states ───────────────────────────────────────
+app.get("/api/states", async (req, res) => {
+  try {
+    const states = await Pincode.distinct("stateName");
+    const uniqueStates = [...new Set(states.map((s) => s?.trim()).filter(Boolean))].sort();
+    res.json(uniqueStates);
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ── GET /api/states/:state/districts ──────────────────────
+app.get("/api/states/:state/districts", async (req, res) => {
+  try {
+    const stateName = req.params.state.trim();
+    const allStates = await Pincode.distinct("stateName");
+    const matchedState = allStates.find(s => s.trim().toLowerCase() === stateName.toLowerCase());
+    if (!matchedState) return res.json([]);
+    const districts = await Pincode.distinct("districtName", { stateName: matchedState });
+    res.json([...new Set(districts.map(d => d?.trim()).filter(Boolean))].sort());
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ── GET /api/states/:state/districts/:district/taluks ─────
+app.get("/api/states/:state/districts/:district/taluks", async (req, res) => {
+  try {
+    const { state, district } = req.params;
+    const allStates = await Pincode.distinct("stateName");
+    const matchedState = allStates.find(s => s.trim().toLowerCase() === state.trim().toLowerCase());
+    if (!matchedState) return res.json([]);
+    const allDistricts = await Pincode.distinct("districtName", { stateName: matchedState });
+    const matchedDistrict = allDistricts.find(d => d?.trim().toLowerCase() === district.trim().toLowerCase());
+    if (!matchedDistrict) return res.json([]);
+    const taluks = await Pincode.distinct("taluk", { stateName: matchedState, districtName: matchedDistrict });
+    res.json([...new Set(taluks.map(t => t?.trim()).filter(Boolean))].sort());
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ── GET /api/states/:state/districts/:district/taluks ─────
+app.get("/api/states/:state/districts/:district/taluks", async (req, res) => {
+  try {
+    const { state, district } = req.params;
+    const taluks = await Pincode.aggregate([
+      {
+        $addFields: {
+          normalizedState: {
+            $trim: {
+              input: {
+                $reduce: {
+                  input: { $split: [{ $toLower: "$stateName" }, " "] },
+                  initialValue: "",
+                  in: { $concat: ["$$value", { $cond: [{ $eq: ["$$value", ""] }, "", " "] }, "$$this"] },
+                },
+              },
+            },
+          },
+          normalizedDistrict: {
+            $trim: {
+              input: {
+                $reduce: {
+                  input: { $split: [{ $toLower: "$districtName" }, " "] },
+                  initialValue: "",
+                  in: { $concat: ["$$value", { $cond: [{ $eq: ["$$value", ""] }, "", " "] }, "$$this"] },
+                },
+              },
+            },
+          },
+          searchState: { $toLower: { $trim: { input: state } } },
+          searchDistrict: { $toLower: { $trim: { input: district } } },
+        },
+      },
+      {
+        $match: {
+          $expr: {
+            $and: [
+              { $eq: ["$normalizedState", "$searchState"] },
+              { $eq: ["$normalizedDistrict", "$searchDistrict"] },
+            ],
+          },
+        },
+      },
+      { $group: { _id: { $trim: { input: "$taluk" } } } },
+      { $sort: { _id: 1 } },
+    ]);
+    res.json(taluks.map((t) => t._id).filter(Boolean));
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ── GET /api/pincodes (filtered + paginated) ──────────────
+app.get("/api/pincodes", async (req, res) => {
+  try {
+    const { state, district, taluk, page = 1, limit = 20 } = req.query;
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const skip = (pageNum - 1) * limitNum;
+
+    const query = {};
+    if (state) {
+      const allStates = await Pincode.distinct("stateName");
+      const matchedState = allStates.find(s => s.trim().toLowerCase() === state.trim().toLowerCase());
+      if (matchedState) query.stateName = matchedState;
+    }
+    if (district) {
+      const allDistricts = await Pincode.distinct("districtName");
+      const matchedDistrict = allDistricts.find(d => d?.trim().toLowerCase() === district.trim().toLowerCase());
+      if (matchedDistrict) query.districtName = matchedDistrict;
+    }
+    if (taluk) {
+      const allTaluks = await Pincode.distinct("taluk");
+      const matchedTaluk = allTaluks.find(t => t?.trim().toLowerCase() === taluk.trim().toLowerCase());
+      if (matchedTaluk) query.taluk = matchedTaluk;
+    }
+
+    const [data, total] = await Promise.all([
+      Pincode.find(query).skip(skip).limit(limitNum),
+      Pincode.countDocuments(query),
+    ]);
+
+    res.json({
+      data: data.map((d) => ({
+        pincode: d.pincode,
+        officeName: d.officeName,
+        officeType: d.officeType,
+        deliveryStatus: d.deliveryStatus,
+        taluk: d.taluk?.trim(),
+        district: d.districtName?.trim(),
+        state: d.stateName?.trim(),
+        division: d.divisionName,
+        region: d.regionName,
+        circle: d.circleName,
+      })),
+      total,
+      page: pageNum,
+      limit: limitNum,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ── GET /api/stats/state-distribution ─────────────────────
+app.get("/api/stats/state-distribution", async (req, res) => {
+  try {
+    const data = await Pincode.aggregate([
+      { $group: { _id: "$stateName", count: { $sum: 1 } } },
+      { $project: { state: { $trim: { input: "$_id" } }, count: 1, _id: 0 } },
+      { $sort: { count: -1 } },
+    ]);
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ── GET /api/stats/delivery-distribution ──────────────────
+app.get("/api/stats/delivery-distribution", async (req, res) => {
+  try {
+    const data = await Pincode.aggregate([
+      { $group: { _id: "$deliveryStatus", count: { $sum: 1 } } },
+    ]);
+    const result = {};
+    data.forEach((d) => {
+      const key = (d._id || "Unknown").toLowerCase().replace(/\s+/g, "");
+      result[key] = d.count;
+    });
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ── GET /api/export ───────────────────────────────────────
+app.get("/api/export", async (req, res) => {
+  try {
+    const { state, district, taluk } = req.query;
+    const query = {};
+    if (state) query.stateName = { $regex: new RegExp(`^${state}$`, "i") };
+    if (district) query.districtName = { $regex: new RegExp(`^${district}$`, "i") };
+    if (taluk) query.taluk = { $regex: new RegExp(`^${taluk}$`, "i") };
+
+    const data = await Pincode.find(query);
+    const csvRows = [
+      "Pincode,Office Name,Office Type,Delivery Status,Taluk,District,State,Division,Region,Circle",
+      ...data.map(
+        (d) =>
+          `${d.pincode},"${d.officeName}","${d.officeType}","${d.deliveryStatus}","${d.taluk}","${d.districtName}","${d.stateName}","${d.divisionName}","${d.regionName}","${d.circleName}"`
+      ),
+    ];
+    const csv = csvRows.join("\n");
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", `attachment; filename="pincodes_export.csv"`);
+    res.send(csv);
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ── GET /states (legacy) ──────────────────────────────────
 app.get("/states", async (req, res) => {
   try {
     const states = await Pincode.distinct("stateName");
@@ -303,7 +538,7 @@ app.get("/states", async (req, res) => {
   }
 });
 
-// ── GET /states/:state_name ───────────────────────────────
+// ── GET /states/:state_name (legacy) ──────────────────────
 app.get("/states/:state_name", async (req, res) => {
   try {
     const stateName = req.params.state_name.trim().toUpperCase();
