@@ -705,20 +705,222 @@ body.light .ac-type{
 }
 
 /* ── responsive ── */
+@media(max-width:1200px){
+  .sidebar{width:220px;min-width:220px;}
+  .main{padding:32px 28px;}
+  .card-grid-4{grid-template-columns:repeat(2,1fr);}
+  .stat-value{font-size:28px;}
+}
 @media(max-width:900px){
   .sidebar{width:200px;min-width:200px;}
   .main{padding:28px 24px;}
-  .card-grid-4{grid-template-columns:1fr 1fr;}
+  .card-grid-4{grid-template-columns:repeat(2,1fr);}
+  .card-grid-3{grid-template-columns:repeat(2,1fr);}
   .compare-grid{grid-template-columns:1fr;gap:12px;}
+  .vs-badge{margin:0 auto;}
+  .result-hero{flex-direction:column;gap:12px;}
+  .pin-big{font-size:42px;}
+  .city-big{font-size:20px;}
+  .info-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:768px){
+  .sidebar{
+    width:100%;min-width:unset;height:auto;position:relative;
+    flex-direction:row;flex-wrap:wrap;gap:6px;padding:12px 16px;
+    border-right:none;border-bottom:1px solid var(--border);
+  }
+  .app{flex-direction:column;}
+  .logo{padding-bottom:0;margin-right:auto;font-size:18px;}
+  .logo span{display:none;}
+  .nav-item{padding:8px 10px;font-size:12px;width:auto;}
+  .sidebar-footer{width:100%;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+  .main{padding:24px 16px;}
+  .page-title{font-size:24px;}
+  .page-sub{font-size:13px;}
+  .card-grid-4{grid-template-columns:repeat(2,1fr);}
+  .card-grid-3{grid-template-columns:1fr 1fr;}
+  .card-grid-2{grid-template-columns:1fr;}
+  .stat-value{font-size:24px;}
+  .stat-label{font-size:10px;}
+  .search-bar{flex-wrap:wrap;padding:6px;}
+  .search-btn{width:100%;justify-content:center;}
+  .pin-big{font-size:36px;}
+  .city-big{font-size:18px;}
+  .result-meta{flex-direction:column;gap:6px;}
+  .info-grid{grid-template-columns:1fr 1fr;}
+  .nearby-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));}
+  .states-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));}
+  .compare-grid{grid-template-columns:1fr;}
   .vs-badge{margin:0 auto;}
 }
 @media(max-width:640px){
-  .app{flex-direction:column;}
-  .sidebar{width:100%;height:auto;position:relative;flex-direction:row;flex-wrap:wrap;gap:6px;padding:16px;}
-  .logo{padding-bottom:0;margin-right:auto;}
-  .nav-item{padding:8px 10px;font-size:12px;}
-  .main{padding:20px 16px;}
-  .card-grid-2,.card-grid-3,.card-grid-4{grid-template-columns:1fr;}
+  .main{padding:20px 12px;}
+  .page-title{font-size:22px;}
+  .page-header{margin-bottom:24px;}
+  .card{padding:16px;}
+  .chart-card{padding:16px;}
+  .card-grid-4,.card-grid-3{grid-template-columns:1fr;}
+  .stat-card{padding:16px 18px;}
+  .stat-value{font-size:22px;}
+  .search-bar{padding:6px;gap:6px;}
+  .search-input{font-size:14px;padding:6px 10px;}
+  .search-btn{padding:8px 16px;font-size:13px;}
+  .pin-big{font-size:32px;}
+  .city-big{font-size:16px;}
+  .result-hero{padding:20px 16px;}
+  .result-body{padding:16px;}
+  .info-grid{grid-template-columns:1fr;}
+  .office-list{max-height:120px;}
+  .nearby-grid{grid-template-columns:1fr 1fr;}
+  .states-grid{grid-template-columns:1fr 1fr;}
+  .state-card{padding:12px 14px;}
+  .state-name-txt{font-size:12px;}
+  .district-hdr{padding:12px 14px;}
+  .district-name{font-size:13px;}
+  .city-pill{font-size:11px;padding:4px 10px;}
+  .bulk-input{height:100px;font-size:14px;}
+  .bulk-row{flex-direction:column;align-items:flex-start;gap:6px;}
+  .bulk-pin{min-width:unset;}
+  .compare-grid{gap:8px;}
+  .compare-row{flex-direction:column;gap:4px;}
+  .compare-item{width:100%;}
+  .compare-item:nth-child(2){display:none;}
+  .export-row{flex-direction:column;gap:6px;}
+  .export-row .btn-sm{width:100%;justify-content:center;}
+  .map-wrap{height:260px;}
+  .history-wrap{gap:6px;}
+  .history-tag{font-size:12px;padding:4px 10px;}
+  .type-tab{padding:5px 10px;font-size:11px;}
+  .search-type-tabs{gap:4px;}
+}
+@media(max-width:480px){
+  .sidebar{padding:10px 12px;gap:4px;}
+  .logo{font-size:16px;}
+  .nav-item{padding:6px 8px;font-size:11px;gap:6px;}
+  .nav-icon{font-size:14px;width:16px;}
+  .main{padding:16px 10px;}
+  .page-title{font-size:20px;}
+  .page-sub{font-size:12px;}
+  .card{padding:14px;border-radius:14px;}
+  .chart-card{padding:12px;border-radius:14px;}
+  .stat-card{padding:14px 16px;border-radius:14px;}
+  .stat-value{font-size:20px;}
+  .stat-label{font-size:9px;}
+  .stat-sub{font-size:11px;}
+  .search-bar{padding:4px;gap:4px;border-radius:12px;}
+  .search-input{font-size:13px;padding:4px 8px;}
+  .search-btn{padding:6px 12px;font-size:12px;border-radius:8px;}
+  .pin-big{font-size:28px;}
+  .city-big{font-size:14px;}
+  .result-hero{padding:16px 12px;}
+  .result-body{padding:12px;}
+  .info-grid{gap:8px;}
+  .info-item{padding:10px 12px;border-radius:10px;}
+  .info-label{font-size:9px;}
+  .info-val{font-size:12px;}
+  .nearby-grid{grid-template-columns:1fr;}
+  .states-grid{grid-template-columns:1fr;}
+  .state-card{padding:10px 12px;border-radius:12px;}
+  .district-card{border-radius:12px;}
+  .district-hdr{padding:10px 12px;}
+  .district-name{font-size:12px;}
+  .count-badge{font-size:10px;padding:2px 8px;}
+  .city-pill{font-size:10px;padding:3px 8px;border-radius:6px;}
+  .bulk-input{height:80px;font-size:13px;padding:12px;}
+  .bulk-row{padding:10px 12px;border-radius:10px;}
+  .bulk-pin{font-size:14px;}
+  .bulk-city{font-size:12px;}
+  .bulk-state{font-size:11px;}
+  .bulk-not-found{font-size:12px;padding:8px 12px;border-radius:8px;}
+  .compare-item{padding:8px 10px;border-radius:8px;}
+  .compare-field{font-size:9px;}
+  .compare-val{font-size:11px;}
+  .vs-badge{width:32px;height:32px;font-size:10px;}
+  .chart-title{font-size:13px;}
+  .chart-sub{font-size:11px;}
+  .map-wrap{height:220px;}
+  .history-tag{font-size:11px;padding:3px 8px;border-radius:6px;}
+  .type-tab{padding:4px 8px;font-size:10px;border-radius:100px;}
+  .btn-sm{padding:6px 12px;font-size:12px;border-radius:8px;}
+  .back-btn{padding:7px 12px;font-size:12px;border-radius:8px;}
+  .empty{padding:40px 16px;}
+  .empty-icon{font-size:36px;}
+  .empty h3{font-size:16px;}
+  .empty p{font-size:12px;}
+  .error-bar{font-size:12px;padding:10px 14px;border-radius:10px;}
+  .section-title{font-size:11px;}
+  .autocomplete-list{border-radius:10px;}
+  .ac-item{padding:8px 12px;font-size:13px;}
+  .theme-toggle{padding:8px 10px;font-size:12px;}
+  .toggle-pill{width:32px;height:18px;}
+  .toggle-dot{width:12px;height:12px;top:2px;left:2px;}
+  .toggle-pill.on .toggle-dot{left:16px;}
+}
+@media(max-width:360px){
+  .sidebar{padding:8px 10px;}
+  .logo{font-size:14px;}
+  .nav-item{padding:5px 6px;font-size:10px;gap:4px;}
+  .nav-icon{font-size:12px;width:14px;}
+  .main{padding:12px 8px;}
+  .page-title{font-size:18px;}
+  .page-sub{font-size:11px;}
+  .card{padding:12px;border-radius:12px;}
+  .chart-card{padding:10px;border-radius:12px;}
+  .stat-card{padding:12px 14px;border-radius:12px;}
+  .stat-value{font-size:18px;}
+  .stat-label{font-size:8px;}
+  .stat-sub{font-size:10px;}
+  .search-bar{padding:4px;}
+  .search-input{font-size:12px;padding:4px 6px;}
+  .search-btn{padding:5px 10px;font-size:11px;}
+  .pin-big{font-size:24px;}
+  .city-big{font-size:13px;}
+  .result-hero{padding:12px 10px;}
+  .result-body{padding:10px;}
+  .info-item{padding:8px 10px;}
+  .info-label{font-size:8px;}
+  .info-val{font-size:11px;}
+  .nearby-grid{grid-template-columns:1fr;}
+  .nearby-card{padding:10px 12px;}
+  .nearby-pin{font-size:16px;}
+  .nearby-city{font-size:12px;}
+  .nearby-meta{font-size:10px;}
+  .states-grid{grid-template-columns:1fr;}
+  .state-card{padding:8px 10px;}
+  .state-name-txt{font-size:11px;}
+  .district-hdr{padding:8px 10px;}
+  .district-name{font-size:11px;}
+  .count-badge{font-size:9px;padding:2px 6px;}
+  .city-pill{font-size:9px;padding:2px 6px;}
+  .bulk-input{height:70px;font-size:12px;padding:10px;}
+  .bulk-row{padding:8px 10px;}
+  .bulk-pin{font-size:13px;}
+  .bulk-city{font-size:11px;}
+  .bulk-state{font-size:10px;}
+  .compare-item{padding:6px 8px;}
+  .compare-field{font-size:8px;}
+  .compare-val{font-size:10px;}
+  .vs-badge{width:28px;height:28px;font-size:9px;}
+  .chart-title{font-size:12px;}
+  .chart-sub{font-size:10px;}
+  .map-wrap{height:180px;}
+  .history-tag{font-size:10px;padding:2px 6px;}
+  .type-tab{padding:3px 6px;font-size:9px;}
+  .btn-sm{padding:5px 10px;font-size:11px;}
+  .back-btn{padding:6px 10px;font-size:11px;}
+  .empty{padding:30px 12px;}
+  .empty-icon{font-size:30px;}
+  .empty h3{font-size:14px;}
+  .empty p{font-size:11px;}
+  .error-bar{font-size:11px;padding:8px 12px;}
+  .section-title{font-size:10px;}
+  .autocomplete-list{border-radius:8px;}
+  .ac-item{padding:6px 10px;font-size:12px;}
+  .ac-type{font-size:9px;padding:2px 6px;}
+  .theme-toggle{padding:6px 8px;font-size:11px;}
+  .toggle-pill{width:28px;height:16px;}
+  .toggle-dot{width:10px;height:10px;top:2px;left:2px;}
+  .toggle-pill.on .toggle-dot{left:14px;}
 }
 `;
 
